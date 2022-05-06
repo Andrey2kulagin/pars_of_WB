@@ -42,30 +42,19 @@ def search(driver, input):  # 5
 # вход в маяк и еще здесь будет подтверждение возраста
 def login(driver):  # 4
     print("#4")
-    driver.get(url="https://mayak.bz/spasibo")
-    driver.close()
+    driver.get(url="https://app.mayak.bz/users/sign_in?utm_source=plugin")
     driver.switch_to.window(driver.window_handles[0])
-    WebDriverWait(driver, 50).until(
-        EC.presence_of_element_located((By.XPATH, "//*[@id='rec329224767']/div/div/div[5]/a")))
-    SpasiboBtn = driver.find_element(By.XPATH, "//*[@id='rec329224767']/div/div/div[5]/a")
-    SpasiboBtn.click()
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
-    WebDriverWait(driver, 50).until(
-        EC.presence_of_element_located((By.XPATH, "//*[@id='infoBlockProductCard']/div[6]/div/div[2]/a/img")))
-    GetLogBtn = driver.find_element(By.XPATH, "//*[@id='infoBlockProductCard']/div[6]/div/div[2]/a/img")
-    GetLogBtn.click()
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
+
     WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.XPATH, "//*[@id='email']")))
     setMail = driver.find_element(By.XPATH, "//*[@id='email']")
     setPasw = driver.find_element(By.XPATH, "//*[@id='user_password']")
     setMail.send_keys("elnar3primo@yandex.ru")
+    print("веден логин")
     setPasw.send_keys("pars123")
-    loginBTN = driver.find_element(By.XPATH, "//*[@class='btn btn-lg btn-primary']")
-    loginBTN.click()
+    print("введен пароль")
+    setPasw.send_keys(Keys.ENTER)
     driver.get(
-        url="https://www.wildberries.ru/catalog/0/search.aspx?sort=popular&search=")
+        url="https://www.wildberries.ru/catalog/0/search.aspx?sort=popular&search=лдлвыдлывдлывлдыдл")
 
 
 # получение кол-ва через hxr
@@ -95,6 +84,9 @@ def getPrices(driver, input):  # 10
     prices = []
     for price in priceslist:  # 11
         print("#11")
+        print(price.text)
+        if price.text=="":
+            break
         if price.text.find(" ") != -1:
             prices.append(int(price.text.replace(" ", "").replace("₽", "")))
         else:
@@ -107,8 +99,10 @@ def getPrices(driver, input):  # 10
 def getEarnings(driver):  # 12
     print("#12")
     earnings = driver.find_elements(By.XPATH, "//*[@class='mayak-details mayak-details--in-card']/div[1]")
+    print(earnings)
     a = []
     for earning in earnings:  # 13
+        print(earning.text)
         print("#13")
         if earning.text.replace("\u202f", "").split(" ")[1] == "-" or earning.text.replace("\u202f", "").split(" ")[1] == "0" :  # 7
             print("#7")
@@ -196,8 +190,8 @@ chrome_options.add_experimental_option("useAutomationExtension", False)
 # здесь настройки опшион для реплита, здесь может быть не нужно
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
-# chrome_options.add_argument("--headless")
-# chrome_options.headless = True # фоновый режим браузера
+chrome_options.add_argument("--window-size=1920,1080")
+chrome_options.headless = True # фоновый режим браузера
 # установка расширения
 extension_path = "C:\my programs\e5.0.4_0.crx"  # поменять расположение расширения
 chrome_options.add_extension(extension_path)
@@ -206,7 +200,6 @@ login(driver)
 fin = open("m_input.txt", "r", encoding="utf-8")
 
 for input in fin:  # 31
-    input = "балончик"
     data = open("data.txt", "a", encoding="utf-8")
     fout = open("output.txt", "a", encoding="utf-8")
     print("#31")
@@ -219,20 +212,20 @@ for input in fin:  # 31
     print(cardsCount)
     print(prices)
     print(earning)
-    ki1 = k1(earning)
-    ki2 = k2(earning)
-    ki3 = k3(earning)
-    ki4 = k4(earning)
-    ki5 = k5(earning)
-    ki6 = k6(earning)
-    ki7 = k7(prices)
-    ki8 = k8(prices)
-    ki9 = k9(prices)
-    data.write(input[0:input.find("  ")] + " earnings = " + str(earning))
-    data.close()
-    outStr = input[0:input.find("  ")] + "," + str(cardsCount) + "," + str(ki1) + "," + str(ki2) + "," + str(
-        ki3) + "," + str(ki4) + "," + str(ki5) + "," + str(ki6) + "," + str(ki7) + "," + str(ki8) + "," + str(ki9)
-    fout.write(outStr + "\n")
-    fout.close()
+    # ki1 = k1(earning)
+    # ki2 = k2(earning)
+    # ki3 = k3(earning)
+    # ki4 = k4(earning)
+    # ki5 = k5(earning)
+    # ki6 = k6(earning)
+    # ki7 = k7(prices)
+    # ki8 = k8(prices)
+    # ki9 = k9(prices)
+    # data.write(input[0:input.find("  ")] + " earnings = " + str(earning))
+    # data.close()
+    # outStr = input[0:input.find("  ")] + "," + str(cardsCount) + "," + str(ki1) + "," + str(ki2) + "," + str(
+    #     ki3) + "," + str(ki4) + "," + str(ki5) + "," + str(ki6) + "," + str(ki7) + "," + str(ki8) + "," + str(ki9)
+    # fout.write(outStr + "\n")
+    # fout.close()
     print("---------------_____----------________----------___________------_______----" + "\n" + "\n")
     print("конец работы с ", input)
