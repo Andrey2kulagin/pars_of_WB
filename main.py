@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 import statistics
 
 
+
 # параметры для нахождения кол-ва через xhr
 def getParam(str):  # 1
     print("#1")

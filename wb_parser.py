@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import time
 import statistics
+from multiprocessing import Process, Queue
 
 
 class Parser_wb():
@@ -23,9 +24,9 @@ class Parser_wb():
 
     # установка расширения
 
-    def __init__(self, input):
+    def __init__(self):
         print("init")
-        self.input = input
+
         self.driver = webdriver.Chrome(options=self.set_option())
         print("init2")
 
@@ -64,17 +65,18 @@ class Parser_wb():
         inputLine.send_keys(Keys.ENTER)
         print("нажат энтер")
 
-    #нахождение кол-ва карточек
+    # нахождение кол-ва карточек
     def getCount(self):  # 6
         print("6")
         print("ждём загрузки кол-ва товаров")
-        WebDriverWait(self.driver, 50).until(EC.presence_of_element_located((By.XPATH, "//*[@class='goods-count']/span[1]")))
+        WebDriverWait(self.driver, 50).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@class='goods-count']/span[1]")))
         print("кол-во товаров загружено")
-        while self.driver.find_element(By.XPATH, "//*[@class='goods-count']/span[1]").text=="":
+        while self.driver.find_element(By.XPATH, "//*[@class='goods-count']/span[1]").text == "":
             continue
         cards_count_element = self.driver.find_element(By.XPATH, "//*[@class='goods-count']/span[1]")
         print("кол-во товаров получено")
-        cards_count = cards_count_element.text.replace(" ","")
+        cards_count = cards_count_element.text.replace(" ", "")
         return int(cards_count)
         # получение интового массива с ценами
 
@@ -91,11 +93,16 @@ class Parser_wb():
         for price in priceslist:  # 11
             prices.append(int(price.text.replace(" ", "").replace("₽", "")))
         return prices
-    def getEarnings(self,driver):  # 12
-        print("Получем выручку, юхуууу")
+
+    def getEarnings(self):  # 12
+        print("Получаем выручку, юхуууу")
         # значение выручки получаеtся из расширения для браузера, в фоновом режиме расширение не работает, поэтому блок выручки пока надо отключить
         # а фоновый режим необходим, т.к. в обычном режиме мой ноут не тянет даже простую работу, не говорю уже о многопоточности
-    def main(self):
+
+    def main(self, input,q):
+        input_file = open("m_input3.txt", "a", encoding="utf-8")
+        self.input = input
+        print(f"Начало работы с {input}")
         self.login()
         self.search()
         goods_count = self.getCount()
@@ -103,8 +110,56 @@ class Parser_wb():
         min_price = min(prices_arr)
         max_price = max(prices_arr)
         median_price = statistics.median(prices_arr)
-        return_str = f"{goods_count},{min_price},{median_price},{max_price}"
-        return return_str
+        return_str = f"{self.input},{goods_count},{min_price},{median_price},{max_price}" + "\n"
+        q.put(return_str)
 
-a = Parser_wb("чайник")
-print(a.main())
+
+class My_Pool():
+    def __init__(self, filename, input):
+        self.filename = filename
+        self.input = input
+
+    def main(self):
+        if __name__ == "__main__":
+            q = Queue()
+            proc0 = Process(target=Parser_wb, args=(self.input[0], q))
+            proc1 = Process(target=Parser_wb, args=(self.input[1], q))
+            proc2 = Process(target=Parser_wb, args=(self.input[2], q))
+            proc3 = Process(target=Parser_wb, args=(self.input[3], q))
+            proc4 = Process(target=Parser_wb, args=(self.input[4], q))
+            proc5 = Process(target=Parser_wb, args=(self.input[5], q))
+            proc0.start()
+            proc1.start()
+            proc2.start()
+            proc3.start()
+            proc4.start()
+            proc5.start()
+            alive = (proc1.is_alive() or proc0.is_alive() or proc2.is_alive() or proc3.is_alive() or
+                     proc4.is_alive() or proc5.is_alive())
+            while alive or not q.empty():
+                if not q.empty():
+                    f = open(self.filename, "a", encoding="utf-8")
+                    value = q.get(timeout=1)
+                    f.write(str(value))
+                    f.close()
+                    alive = (proc1.is_alive() or proc0.is_alive() or proc2.is_alive() or proc3.is_alive() or
+                             proc4.is_alive() or proc5.is_alive())
+                else:
+                    alive = (proc1.is_alive() or proc0.is_alive() or proc2.is_alive() or proc3.is_alive() or
+                             proc4.is_alive() or proc5.is_alive())
+                    continue
+
+
+
+input_file = open("m_input3.txt", "r", encoding="utf-8")
+input_arr = []
+for i in range(10000):
+    inp = input_file.readline()
+    input_arr.append(inp.replace("\n",""))
+    if len(input_arr)!=0 and len(input_arr)%6==0:
+        mp = My_Pool("output.txt",input_arr)
+        mp.main()
+        input_arr = []
+
+#чёт нихуя не работает. ладно, утро вечера мудренее
+# вопрос с многопроцессорностью решен, теперь задача придумать, как распределять инпут и наладить работу с файлом аутпута

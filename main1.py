@@ -1,37 +1,58 @@
-import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-import statistics
-# настройки опшион
-chrome_options = Options()
-# неробот
-chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-chrome_options.add_experimental_option("useAutomationExtension", False)
-# здесь настройки опшион для реплита, здесь может быть не нужно
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-#chrome_options.add_argument("--headless")
-#chrome_options.headless = True # фоновый режим браузера
-# установка расширения
-extension_path = "C:\my programs\e5.0.4_0.crx"  # поменять расположение расширения
-chrome_options.add_extension(extension_path)
-driver = webdriver.Chrome(options=chrome_options)
-#начало логина
-# driver.close()
-# driver.switch_to.window(driver.window_handles[0])
-driver.get(url = "https://app.mayak.bz/users/sign_in?utm_source=plugin")
-driver.switch_to.window(driver.window_handles[0])
+import time
 
-WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.XPATH, "//*[@id='email']")))
-setMail = driver.find_element(By.XPATH, "//*[@id='email']")
-setPasw = driver.find_element(By.XPATH, "//*[@id='user_password']")
-setMail.send_keys("elnar3primo@yandex.ru")
-print("веден логин")
-setPasw.send_keys("pars123")
-print("введен пароль")
-loginBTN = driver.find_element(By.XPATH, "//*[@class='btn btn-lg btn-primary']")
-loginBTN.click()
+from multiprocessing import Process
+from multiprocessing import Pool
+from multiprocessing import Queue
+class Skip():
+    def main(self,num,q):
+        for i in range(15):
+            j = i**100000
+            print(num)
+            q.put(num)
+
+class My_Pool():
+    def __init__(self, filename, input):
+        self.filename = filename
+        self.input = input
+
+    def main(self):
+        if __name__ == "__main__":
+            q = Queue()
+            proc0 = Process(target=Skip, args=(self.input[0], q))
+            proc1 = Process(target=Skip, args=(self.input[1], q))
+            proc2 = Process(target=Skip, args=(self.input[2], q))
+            proc3 = Process(target=Skip, args=(self.input[3], q))
+            proc4 = Process(target=Skip, args=(self.input[4], q))
+            proc5 = Process(target=Skip, args=(self.input[5], q))
+            proc6 = Process(target=Skip, args=(self.input[6], q))
+            proc7 = Process(target=Skip, args=(self.input[7], q))
+            proc8 = Process(target=Skip, args=(self.input[8], q))
+            proc9 = Process(target=Skip, args=(self.input[9], q))
+            proc10 = Process(target=Skip, args=(self.input[10], q))
+            proc0.start()
+            proc1.start()
+            proc2.start()
+            proc3.start()
+            proc4.start()
+            proc5.start()
+            proc6.start()
+            proc7.start()
+            proc8.start()
+            proc9.start()
+            proc10.start()
+            alive = (proc1.is_alive() or proc0.is_alive() or proc2.is_alive() or proc3.is_alive() or
+                     proc4.is_alive() or proc5.is_alive() or proc6.is_alive()
+                     or proc7.is_alive() or proc8.is_alive() or proc9.is_alive() or proc10.is_alive())
+            while alive or not q.empty():
+                if not q.empty():
+                    f = open(self.filename, "a", encoding="utf-8")
+                    value = q.get(timeout=1)
+                    f.write(str(value) + '\n')
+                    f.close()
+                    alive = (proc1.is_alive() or proc0.is_alive() or proc2.is_alive() or proc3.is_alive() or
+                             proc4.is_alive() or proc5.is_alive() or proc6.is_alive()
+                             or proc7.is_alive() or proc8.is_alive() or proc9.is_alive() or proc10.is_alive())
+                else:
+                    continue
+pool = My_Pool("text.txt",[0,1,2,3,4,5,6,7,8,9,10])
+pool.main()
